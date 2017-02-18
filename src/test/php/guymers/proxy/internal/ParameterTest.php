@@ -7,7 +7,7 @@ use \ReflectionClass;
 
 use guymers\proxy\mock\Test;
 
-class ParameterTest extends PHPUnit_Framework_TestCase {
+class ParameterTest extends \PHPUnit_Framework_TestCase {
 
 	private $parameterClassAndReference;
 	private $parameterClassAndDefault;
@@ -48,4 +48,74 @@ class ParameterTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('\guymers\proxy\blah\TestNotLoaded $param', $this->parameterClassNotLoaded->asFullString());
 	}
 
+    /**
+     * @test
+     */
+    public function asFullStringSoapClient() {
+        $reflectionClass = new ReflectionClass(new \SoapClient(null, ["location" => "", "uri" => ""]));
+        $method = $reflectionClass->getMethod("SoapClient");
+        $parameter = $method->getParameters()[1];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$options = NULL", $underTest->asFullString());
+
+    }
+
+    /**
+     * @test
+     */
+    public function asFullString__soapCall() {
+        $reflectionClass = new ReflectionClass(new \SoapClient(null, ["location" => "", "uri" => ""]));
+
+        $method = $reflectionClass->getMethod("__soapCall");
+        $parameter = $method->getParameters()[2];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$options = NULL", $underTest->asFullString());
+
+        $parameter = $method->getParameters()[4];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("&\$output_headers = NULL", $underTest->asFullString());
+
+        $parameter = $method->getParameters()[3];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$input_headers = NULL", $underTest->asFullString());
+    }
+
+    /**
+     * @test
+     */
+    public function asFullString__doRequest() {
+        $reflectionClass = new ReflectionClass(new \SoapClient(null, ["location" => "", "uri" => ""]));
+
+        $method = $reflectionClass->getMethod("__doRequest");
+        $parameter = $method->getParameters()[4];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$one_way = NULL", $underTest->asFullString());
+
+    }
+
+    /**
+     * @test
+     */
+    public function asFullString__setCookie() {
+        $reflectionClass = new ReflectionClass(new \SoapClient(null, ["location" => "", "uri" => ""]));
+
+        $method = $reflectionClass->getMethod("__setCookie");
+        $parameter = $method->getParameters()[1];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$value = NULL", $underTest->asFullString());
+
+    }
+
+    /**
+     * @test
+     */
+    public function asFullString__setLocation() {
+        $reflectionClass = new ReflectionClass(new \SoapClient(null, ["location" => "", "uri" => ""]));
+
+        $method = $reflectionClass->getMethod("__setLocation");
+        $parameter = $method->getParameters()[0];
+        $underTest = new Parameter($parameter);
+        $this->assertEquals("\$new_location = NULL", $underTest->asFullString());
+
+    }
 }
