@@ -54,6 +54,11 @@ class Parameter {
 			$string = $string . " = " . $defaultValueString;
 		}
 
+        // workaround for SoapClient
+        elseif ($this->parameter->getDeclaringClass()->getName() == "SoapClient") {
+            $string .= $this->checkSoapClientWorkarounds();
+        }
+
 		return $string;
 	}
 
@@ -86,5 +91,27 @@ class Parameter {
 
 		return $name;
 	}
+
+    private function checkSoapClientWorkarounds()
+    {
+        $applicable = false;
+        if ($this->parameter->getDeclaringFunction()->getName() == "SoapClient" && $this->parameter->getName() == "options") {
+            $applicable = true;
+        }
+        if ($this->parameter->getDeclaringFunction()->getName() == "__soapCall" &&
+            in_array($this->parameter->getName(), ["options", "output_headers", "input_headers"])) {
+            $applicable = true;
+        }
+        if ($this->parameter->getDeclaringFunction()->getName() == "__doRequest" && $this->parameter->getName() == "one_way") {
+            $applicable = true;
+        }
+        if ($this->parameter->getDeclaringFunction()->getName() == "__setCookie" && $this->parameter->getName() == "value") {
+            $applicable = true;
+        }
+        if ($this->parameter->getDeclaringFunction()->getName() == "__setLocation" && $this->parameter->getName() == "new_location") {
+            $applicable = true;
+        }
+        return $applicable ? " = NULL" : "";
+    }
 
 }
